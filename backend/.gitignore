@@ -6,6 +6,7 @@ __pycache__/
 *$py.class
 
 credentials.json
+*.session
 
 # C extensions
 *.so
