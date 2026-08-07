@@ -11,7 +11,7 @@ class CandidateDB(Base):
     __tablename__ = "candidates"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String, index=True, unique=False,)
     grade = Column(String)
     market_grade = Column(String)
     self_grade = Column(String)

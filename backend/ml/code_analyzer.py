@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
-from scipy.spatial.distance import cosine
 
 print("Загрузка GraphCodeBERT...")
 MODEL_NAME = "microsoft/graphcodebert-base"
