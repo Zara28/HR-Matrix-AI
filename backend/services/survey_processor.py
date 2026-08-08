@@ -1,11 +1,13 @@
 import re
 import pandas as pd
 from sqlalchemy.orm import Session
+import time
 
 from core.database import CandidateDB
 from core.database import SystemSettingsDB, VacancyDB
 # Убедись, что импортирована функция get_embedding
 from ml.code_analyzer import get_embedding, calculate_k_quality_v3
+from core.monitoring import TOTAL_PROCESSING_TIME
 # Глобальное состояние для матрицы весов
 weights_dict = {}
 
@@ -117,116 +119,121 @@ def get_verified_grade(tsi_score: float, k_score: float, middle_threshold: float
 
 
 def process_survey_dataframe(df: pd.DataFrame, vacancy_id: int, db: Session) -> list:
-    middle_tsi_threshold, senior_tsi_threshold, v_ideal_dynamic, v_broken_dynamic = get_settings(vacancy_id, db)
+    start_time = time.time()
+    try:
+        middle_tsi_threshold, senior_tsi_threshold, v_ideal_dynamic, v_broken_dynamic = get_settings(vacancy_id, db)
 
-    column_map = {
-        'Твой ник в Telegram': 'tg',
-        'Твой стаж в разработке на C#': 'exp',
-        'Ты работаешь C#-разработчиком': 'job_grade',
-        'На какой грейд ты оцениваешь себя': 'self_grade',
-        'Какие технические навыки': 'skills',
-        'С чем из ниже перечисленного': 'arch_list',
-        'Твое решение': 'code'
-    }
-    new_columns = []
-    for col in df.columns:
-        found = False
-        for key, val in column_map.items():
-            if key in col:
-                new_columns.append(val)
-                found = True
-                break
-        if not found:
-            new_columns.append(col)
+        column_map = {
+            'Твой ник в Telegram': 'tg',
+            'Твой стаж в разработке на C#': 'exp',
+            'Ты работаешь C#-разработчиком': 'job_grade',
+            'На какой грейд ты оцениваешь себя': 'self_grade',
+            'Какие технические навыки': 'skills',
+            'С чем из ниже перечисленного': 'arch_list',
+            'Твое решение': 'code'
+        }
+        new_columns = []
+        for col in df.columns:
+            found = False
+            for key, val in column_map.items():
+                if key in col:
+                    new_columns.append(val)
+                    found = True
+                    break
+            if not found:
+                new_columns.append(col)
 
-    df.columns = new_columns
+        df.columns = new_columns
 
-    # Чистим код от двойных кавычек и лишних пробелов в начале/конце
-    if 'code' in df.columns:
-        df['code'] = df['code'].str.replace('""', '"').str.strip()
+        # Чистим код от двойных кавычек и лишних пробелов в начале/конце
+        if 'code' in df.columns:
+            df['code'] = df['code'].str.replace('""', '"').str.strip()
 
-    passports = []
-    grade_standard = {'джун': 'Junior', 'мидл': 'Middle', 'сеньор': 'Senior', 'синьор': 'Senior'}
-    resp_map = {'Junior': 1.5, 'Middle': 3.0, 'Senior': 5.0, 'Unknown': 1.0}
+        passports = []
+        grade_standard = {'джун': 'Junior', 'мидл': 'Middle', 'сеньор': 'Senior', 'синьор': 'Senior'}
+        resp_map = {'Junior': 1.5, 'Middle': 3.0, 'Senior': 5.0, 'Unknown': 1.0}
 
-    for idx, row in df.iterrows():
-        # Достаем значение и сразу убираем лишние пробелы по краям
-        tg = str(row.get('tg', '')).strip()
+        for idx, row in df.iterrows():
+            # Достаем значение и сразу убираем лишние пробелы по краям
+            tg = str(row.get('tg', '')).strip()
 
-        # Если строка оказалась пустой, 'nan' или None — даем уникальное имя
-        if not tg or tg.lower() == 'nan' or tg.lower() == 'none':
-            tg = f'respondent_{idx}'
+            # Если строка оказалась пустой, 'nan' или None — даем уникальное имя
+            if not tg or tg.lower() == 'nan' or tg.lower() == 'none':
+                tg = f'respondent_{idx}'
 
-        code_text = str(row.get('code', ''))
+            code_text = str(row.get('code', ''))
 
-        # Опыт
-        exp_val = 0.0
-        exp_raw = str(row.get('exp', '0')).replace(',', '.')
-        match = re.search(r"(\d+\.?\d*)", exp_raw)
-        if match:
-            exp_val = float(match.group(1))
+            # Опыт
+            exp_val = 0.0
+            exp_raw = str(row.get('exp', '0')).replace(',', '.')
+            match = re.search(r"(\d+\.?\d*)", exp_raw)
+            if match:
+                exp_val = float(match.group(1))
 
-        def norm_g(val):
-            v = str(val).lower()
-            for r, e in grade_standard.items():
-                if r in v: return e
-            return 'Unknown'
+            def norm_g(val):
+                v = str(val).lower()
+                for r, e in grade_standard.items():
+                    if r in v: return e
+                return 'Unknown'
 
-        market_g = norm_g(row.get('job_grade', ''))
-        self_g = norm_g(row.get('self_grade', ''))
-        l_resp = resp_map.get(market_g, 1.0)
+            market_g = norm_g(row.get('job_grade', ''))
+            self_g = norm_g(row.get('self_grade', ''))
+            l_resp = resp_map.get(market_g, 1.0)
 
-        # WSP расчет с надежным поиском весов
-        tech_text = str(row.get('skills', '')).lower()
-        arch_text = str(row.get('arch_list', '')).lower()
+            # WSP расчет с надежным поиском весов
+            tech_text = str(row.get('skills', '')).lower()
+            arch_text = str(row.get('arch_list', '')).lower()
 
-        if tech_text == 'nan': tech_text = ""
-        if arch_text == 'nan': arch_text = ""
+            if tech_text == 'nan': tech_text = ""
+            if arch_text == 'nan': arch_text = ""
 
-        combined_text = tech_text + " " + arch_text
-        all_skills = [s.strip() for s in re.split(r'[,\n;/]+', combined_text) if s.strip()]
-        unique_skills = set(all_skills)
+            combined_text = tech_text + " " + arch_text
+            all_skills = [s.strip() for s in re.split(r'[,\n;/]+', combined_text) if s.strip()]
+            unique_skills = set(all_skills)
 
-        # Считаем вес с отладкой
-        wsp = 0.0
-        for s in unique_skills:
-            # Ищем точное совпадение или частичное, если ключ длинный
-            weight = weights_dict.get(s, None)
-            if weight is None:
-                # Попробуем найти среди ключей матрицы то, что содержит навык
-                matched_key = next((k for k in weights_dict.keys() if s in k or k in s), None)
-                weight = weights_dict.get(matched_key, 0.1)  # Небольшой дефолтный вес, если навыка нет в таблице
-            wsp += float(weight)
+            # Считаем вес с отладкой
+            wsp = 0.0
+            for s in unique_skills:
+                # Ищем точное совпадение или частичное, если ключ длинный
+                weight = weights_dict.get(s, None)
+                if weight is None:
+                    # Попробуем найти среди ключей матрицы то, что содержит навык
+                    matched_key = next((k for k in weights_dict.keys() if s in k or k in s), None)
+                    weight = weights_dict.get(matched_key, 0.1)  # Небольшой дефолтный вес, если навыка нет в таблице
+                wsp += float(weight)
 
-        b_arch = 1 if arch_text and arch_text != 'nan' else 0
+            b_arch = 1 if arch_text and arch_text != 'nan' else 0
 
-        # Финальный TSI по нашей формуле
-        tsi_final = wsp + (2 * l_resp) + (b_arch * wsp)
+            # Финальный TSI по нашей формуле
+            tsi_final = wsp + (2 * l_resp) + (b_arch * wsp)
 
-        v_cand = get_embedding(code_text)
-        k_quality = calculate_k_quality_v3(v_ideal_dynamic, v_broken_dynamic, v_cand)
+            v_cand = get_embedding(code_text)
+            k_quality = calculate_k_quality_v3(v_ideal_dynamic, v_broken_dynamic, v_cand)
 
-        verified = get_verified_grade(tsi_final, k_quality, middle_tsi_threshold, senior_tsi_threshold)
+            verified = get_verified_grade(tsi_final, k_quality, middle_tsi_threshold, senior_tsi_threshold)
 
-        arch_items = [x.strip() for x in str(row.get('arch_list', '')).split(',') if
-                      x.strip() and x.strip().lower() != 'nan']
-        arch_score_val = min(1.0, len(arch_items) / 8.0) if arch_items else 0.0
+            arch_items = [x.strip() for x in str(row.get('arch_list', '')).split(',') if
+                          x.strip() and x.strip().lower() != 'nan']
+            arch_score_val = min(1.0, len(arch_items) / 8.0) if arch_items else 0.0
 
-        passports.append({
-            "id": idx + 1,
-            "name": tg,
-            "grade": verified["grade"],
-            "marketGrade": market_g,
-            "selfGrade": self_g,
-            "kScore": verified["k_score"],
-            "theory": round(min(tsi_final / 20.0, 1.0), 2),  # Нормализация для шкалы фронта
-            "rationale": verified["rationale"],
-            "tsi": verified["tsi_score"],
-            "exp_years": exp_val,
-            "arch_score": arch_score_val,
-            "vacancy_id": vacancy_id
-        })
+            passports.append({
+                "id": idx + 1,
+                "name": tg,
+                "grade": verified["grade"],
+                "marketGrade": market_g,
+                "selfGrade": self_g,
+                "kScore": verified["k_score"],
+                "theory": round(min(tsi_final / 20.0, 1.0), 2),  # Нормализация для шкалы фронта
+                "rationale": verified["rationale"],
+                "tsi": verified["tsi_score"],
+                "exp_years": exp_val,
+                "arch_score": arch_score_val,
+                "vacancy_id": vacancy_id
+            })
 
-    save_passports_to_db(passports, vacancy_id, db)
+        save_passports_to_db(passports, vacancy_id, db)
 
-    return passports
+        return passports
+    finally:
+        # Фиксируем общее время работы функции, независимо от того, были ли ошибки
+        TOTAL_PROCESSING_TIME.observe(time.time() - start_time)

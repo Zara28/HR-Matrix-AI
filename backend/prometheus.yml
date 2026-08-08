@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 2s # Как часто забирать метрики (каждые 2 секунды)
+
+scrape_configs:
+  - job_name: 'hr_grade_system'
+    static_configs:
+      # host.docker.internal позволяет контейнеру достучаться до localhost твоего компьютера
+      - targets: ['host.docker.internal:8000']
