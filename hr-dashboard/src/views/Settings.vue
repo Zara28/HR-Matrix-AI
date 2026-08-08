@@ -330,10 +330,11 @@ const onMatrixUpload = async (event) => {
   border: none; 
   font-family: inherit;
   transition: all 0.2s;
+  background: #A59988;
 }
 
 .btn-primary { 
-  background: #7d8391; 
+  background: #A59988; 
   color: #ffffff; 
   width: 100%; 
 }

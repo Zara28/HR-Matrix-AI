@@ -13,7 +13,7 @@
         </select>
         
         <button class="btn-sync" @click="syncData" :disabled="!selectedVacancyId">
-          🔄 Синхронизировать
+          Синхронизировать
         </button>
       </div>
     </div>
@@ -76,49 +76,53 @@
 </template>
 
 <style scoped>
+/* --- Основной контейнер и шапка --- */
 .header { 
   display: flex; justify-content: space-between; align-items: center; 
   margin-bottom: 30px; 
 }
-.header h1 { margin: 0; color: #6a6561; font-weight: 700; }
+.header h1 { margin: 0; color: #4a4540; font-weight: 700; }
 
+/* --- Элементы управления --- */
 .actions { display: flex; gap: 15px; align-items: center; }
+
 .search-input, .vacancy-select { 
   padding: 10px 15px; 
-  background: #ffffff; 
-  color: #6a6561; 
-  border: 1px solid #9d9894; 
+  background: #f8f6f4; 
+  color: #5a5550; 
+  border: 1px solid #d3cec8; 
   border-radius: 8px; 
   outline: none; 
   font-size: 0.95rem; 
-  transition: 0.2s;
+  transition: all 0.2s;
 }
+
 .search-input:focus, .vacancy-select:focus {
-  border-color: #7d8391;
-  box-shadow: 0 0 0 2px rgba(125, 131, 145, 0.2);
+  border-color: #8fa3b8;
+  box-shadow: 0 0 0 2px rgba(143, 163, 184, 0.2);
 }
 
 .btn-sync { 
-  background: #7d8391; 
+  background: #A59988; /* Пыльно-голубой */
   color: #ffffff; 
   border: none; 
   padding: 10px 20px; 
   border-radius: 8px; 
   cursor: pointer; 
   font-weight: 600;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
 .btn-sync:hover:not(:disabled) { 
-  background: #6a6561; 
+  background: #7a8ea3; 
 }
 .btn-sync:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* --- Светлая тема для PrimeVue Table --- */
+/* --- Пастельная тема для PrimeVue Table --- */
 :deep(.p-datatable) {
-  background: #c4bfbb !important;
+  background: #f8f6f4 !important;
   border-radius: 12px !important;
-  border: 1px solid #9d9894 !important;
-  box-shadow: 0 4px 15px rgba(106, 101, 97, 0.08) !important;
+  border: 1px solid #e3ddd7 !important;
+  box-shadow: 0 4px 20px rgba(90, 85, 80, 0.04) !important; 
   overflow: hidden;
 }
 
@@ -129,35 +133,35 @@
 }
 
 :deep(.p-datatable-thead > tr > th) {
-  background: #c4bfbb !important;
-  color: #6a6561 !important;
-  border-bottom: 1px solid #9d9894 !important;
+  background: #f0ebe6 !important; 
+  color: #8c857f !important; 
+  border-bottom: 1px solid #e3ddd7 !important;
   border-top: none !important;
   padding: 16px 15px !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
 }
 
 /* Строки таблицы */
 :deep(.p-datatable-tbody > tr) {
-  background: #e1e1e1 !important;
-  color: #6a6561 !important;
+  background: #f8f6f4 !important;
+  color: #5a5550 !important;
+  transition: background 0.2s;
 }
 
-
 :deep(.p-datatable-tbody > tr:hover) {
-  background: rgba(125, 131, 145, 0.15) !important; /* Пыльно-синяя подсветка при наведении */
+  background: #f0ebe6 !important; 
 }
 
 /* Ячейки */
 :deep(.p-datatable-tbody > tr > td) {
-  border-bottom: 1px solid #e1e1e1 !important;
+  border-bottom: 1px solid #efeae5 !important;
   padding: 15px !important;
 }
 
 /* Пагинация */
 :deep(.p-paginator) {
-  background: #ffffff !important;
-  border-top: 1px solid #9d9894 !important;
+  background: #f8f6f4 !important;
+  border-top: 1px solid #e3ddd7 !important;
   padding: 15px !important;
 }
 
@@ -166,40 +170,65 @@
 :deep(.p-paginator .p-paginator-prev),
 :deep(.p-paginator .p-paginator-next),
 :deep(.p-paginator .p-paginator-last) {
-  color: #6a6561 !important;
+  color: #8c857f !important;
   background: transparent !important;
   border: none !important;
   border-radius: 6px !important;
   margin: 0 2px !important;
+  transition: all 0.2s;
 }
 
 /* Принудительная подсветка активной страницы */
 :deep(.p-paginator .p-paginator-page.p-highlight),
 :deep(.p-paginator .p-paginator-page[data-p-highlight="true"]),
 :deep(.p-paginator .p-paginator-page[aria-current="page"]) {
-  background: #7d8391 !important;
+  background: #A59988 !important;
   color: #ffffff !important;
   font-weight: bold !important;
 }
 
 /* Легкий ховер для неактивных страниц */
 :deep(.p-paginator .p-paginator-page:hover:not(.p-highlight)) {
-  background: rgba(125, 131, 145, 0.15) !important;
+  background: #e8e3de !important;
+  color: #5a5550 !important;
 }
+
+/* Ссылки профиля */
+:deep(.p-datatable-tbody > tr > td a) {
+  color: #8fa3b8;
+  text-decoration: none;
+}
+:deep(.p-datatable-tbody > tr > td a:hover) {
+  text-decoration: underline;
+}
+
+/* --- Пастельные бейджи грейдов --- */
 :deep(.grade-badge) {
   padding: 6px 12px;
   border-radius: 6px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.85rem;
   display: inline-block;
   text-align: center;
   white-space: nowrap;
 }
 
-:deep(.grade-junior) { background: #ffd0c0; color: #7b3529; }
-:deep(.grade-middle) { background: #f29875; color: #ffffff; }
-:deep(.grade-senior) { background: #7b3529; color: #ffffff; }
-:deep(.grade-unknown) { background: #b5adab; color: #ffffff; }
+:deep(.grade-junior) { 
+  background: #e2e8e2; /* Приглушенный шалфей */
+  color: #6a7c6a; 
+}
+:deep(.grade-middle) { 
+  background: #f0e6d8; /* Теплый песочный */
+  color: #a38563; 
+}
+:deep(.grade-senior) { 
+  background: #e6e2e8; /* Пыльная лаванда */
+  color: #8a7a94; 
+}
+:deep(.grade-unknown) { 
+  background: #e8e6e3; /* Мягкий серый */
+  color: #8c857f; 
+}
 </style>
 
 <script setup>

@@ -41,8 +41,8 @@ div[style*="z-index: 99999"] {
 
 body { 
   margin: 0; 
-  background-color: #e1e1e1; /* Светлый фон */
-  color: #6a6561; /* Мягкий темный текст */
+  background-color: #f0ebe6; /* Теплый пудрово-серый фон */
+  color: #5a5550; /* Мягкий коричнево-серый текст */
   font-family: 'Inter', sans-serif; 
 }
 
@@ -51,15 +51,15 @@ body {
 /* Боковое меню */
 .sidebar { 
   width: 260px; 
-  background: #6a6561; 
+  background: #706555; /* Молочный оттенок, без чистого белого */
   padding: 25px 20px; 
-  border-right: 1px solid #6a6561; 
+  border-right: 1px solid #e3ddd7; 
   display: flex; 
   flex-direction: column; 
 }
 
 .sidebar h2 { 
-  color: #ffffff; 
+  color: #252321; 
   margin-top: 0; 
   margin-bottom: 35px; 
   font-weight: 800; 
@@ -68,16 +68,23 @@ body {
 .nav-menu { display: flex; flex-direction: column; gap: 10px; }
 .nav-link { 
   padding: 12px 16px; 
-  color: #e1e1e1; 
+  color: #D1CBC2; 
   text-decoration: none; 
   border-radius: 8px; 
   transition: 0.2s ease; 
   font-weight: 600; 
 }
-.nav-link:hover, .router-link-active { 
-  background: #7d8391; /* Пыльно-синий акцент */
+
+.nav-link:hover {
+  background: #e8e3de; 
+  color: #2c2a27; 
+}
+
+/* Принудительная подсветка активной страницы */
+.nav-link.router-link-active { 
+  background: #A59988; /* Пыльно-голубой акцент */
   color: #ffffff; 
-  box-shadow: 0 4px 10px rgba(125, 131, 145, 0.3);
+  box-shadow: 0 4px 12px rgba(143, 163, 184, 0.3); 
 }
 
 .main-content { flex: 1; padding: 40px; overflow-y: auto; }

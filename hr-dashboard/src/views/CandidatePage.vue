@@ -1,6 +1,6 @@
 <template>
   <div class="profile-page">
-    <button class="back-btn" @click="router.push('/')">🔙 Вернуться к списку</button>
+    <button class="back-btn" @click="router.push('/')">Вернуться к списку</button>
 
     <div v-if="candidate" class="dashboard-grid">
       
@@ -136,29 +136,113 @@ const setupCharts = (data) => {
 </script>
 
 <style scoped>
-.profile-page { padding: 30px; background: #e1e1e1; min-height: 100vh; font-family: 'Inter', sans-serif; }
-.back-btn { background: none; border: none; color: #6a6561; cursor: pointer; font-size: 1rem; margin-bottom: 20px; font-weight: 600; }
-.back-btn:hover { color: #7d8391; }
+.profile-page { 
+  padding: 30px; 
+  background: #f5f0eb; /* Мягкий фон цвета молочной пенки */
+  min-height: 100vh; 
+  font-family: 'Inter', sans-serif; 
+}
 
-.dashboard-grid { display: flex; flex-direction: column; gap: 20px; }
-.card { background: #ffffff; border-radius: 12px; padding: 25px; border: 1px solid #9d9894; box-shadow: 0 4px 15px rgba(106, 101, 97, 0.08); }
+.back-btn { 
+  background: none; 
+  border: none; 
+  color: #4a3b32; /* Насыщенный эспрессо */
+  cursor: pointer; 
+  font-size: 1rem; 
+  margin-bottom: 20px; 
+  font-weight: 600; 
+  transition: color 0.2s;
+}
+
+.back-btn:hover { 
+  color: #8b5e34; /* Теплый оттенок мокко при наведении */
+}
+
+.dashboard-grid { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 20px; 
+}
+
+.card { 
+  background: #ffffff; 
+  border-radius: 12px; 
+  padding: 25px; 
+  border: 1px solid #d8caba; /* Граница цвета латте */
+  box-shadow: 0 4px 15px rgba(74, 59, 50, 0.06); /* Легкая кофейная тень */
+}
 
 /* Верхняя карточка */
-.header-card { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;}
-.header-info h2 { margin: 0 0 10px 0; color: #6a6561; font-size: 1.8rem; font-weight: 800; }
-.rationale { margin: 0; color: #9d9894; font-size: 1.1rem; max-width: 600px; line-height: 1.5; }
+.header-card { 
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+}
+
+.header-info h2 { 
+  margin: 0 0 10px 0; 
+  color: #4a3b32; /* Насыщенный эспрессо */
+  font-size: 1.8rem; 
+  font-weight: 800; 
+}
+
+.rationale { 
+  margin: 0; 
+  color: #8c7a6b; /* Приглушенный капучино для вторичного текста */
+  font-size: 1.1rem; 
+  max-width: 600px; 
+  line-height: 1.5; 
+}
 
 .badges { display: flex; gap: 20px; }
-.stat-box { display: flex; flex-direction: column; background: #e8e8e8; padding: 15px 20px; border-radius: 8px; min-width: 150px; border: 1px solid #c4bfbb; }
-.stat-box .label { font-size: 0.85rem; color: #9d9894; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
-.stat-box .value { font-size: 1.3rem; font-weight: 800; color: #6a6561; }
-.stat-box .main-grade { color: #7b3529; } /* Терракотовый акцент для итогового грейда */
+
+.stat-box { 
+  display: flex; flex-direction: column; 
+  background: #f0eae1; /* Светлый кремовый фон карточек статистики */
+  padding: 15px 20px; 
+  border-radius: 8px; 
+  min-width: 150px; 
+  border: 1px solid #d8caba; 
+}
+
+.stat-box .label { 
+  font-size: 0.85rem; 
+  color: #8c7a6b; 
+  text-transform: uppercase; 
+  font-weight: bold; 
+  margin-bottom: 5px; 
+}
+
+.stat-box .value { 
+  font-size: 1.3rem; 
+  font-weight: 800; 
+  color: #4a3b32; 
+}
+
+.stat-box .main-grade { 
+  color: #9c5c35; /* Карамельно-кофейный акцент для итогового грейда */
+} 
 
 /* Графики */
 .charts-row { display: flex; gap: 20px; }
 .chart-card { flex: 1; min-width: 0; }
-.chart-card h3 { margin-top: 0; color: #6a6561; font-weight: 700; text-align: center; }
-.chart-container { height: 400px; display: flex; justify-content: center; align-items: center; }
 
-.loading { text-align: center; margin-top: 100px; color: #9d9894; font-weight: bold; }
+.chart-card h3 { 
+  margin-top: 0; 
+  color: #4a3b32; 
+  font-weight: 700; 
+  text-align: center; 
+}
+
+.chart-container { 
+  height: 400px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+}
+
+.loading { 
+  text-align: center; 
+  margin-top: 100px; 
+  color: #8c7a6b; 
+  font-weight: bold; 
+}
 </style>
